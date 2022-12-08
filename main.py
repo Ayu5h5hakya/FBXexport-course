@@ -14,6 +14,28 @@ def SIP_TagForOrigin(node):
     if cmds.objExists(node)and not cmds.objExists(node + ".origin"):
         cmds.addAttr(node, shortName = "org", longName = "origin", at = "bool")
         cmds.setAttr(node + ".origin", True)
+
+#PURPOSE        add attributes to the mesh so exporter can find them
+#PROCEDURE        if object exists, and the attribute does not, add
+#                exportMeshes message attribute
+#PRESUMPTION    none
+def SIP_TagForMeshExport(mesh):
+    if cmds.objExists(mesh) and not cmds.objExists(mesh + ".exportMeshes"):
+        cmds.addAttr(mesh, shortName = "xms", longName = "exportMeshes", at = "message")
+        
+
+
+
+
+#PURPOSE     add attribute to the node so exporter can find export definitions
+#PROCEDURE    if the object exists, and the attribute
+#            does not exist, add the exportNode message attribute
+#PRESUMPTION none
+def SIP_TagForExportNode(node):
+    if cmds.objExists(node) and not cmds.objExists(node + ".exportNode"):
+        cmds.addAttr(node, shortName = "xnd", longName = "exportNode", at = "message")
+        
+
         
 
 #PURPOSE         Return the origin of the given namespace
@@ -40,6 +62,14 @@ def SIP_ReturnOrigin(ns):
                 return curJoint
                 
     return "Error"
+
+#PRUPOSE        delete given export node
+#PROCEDURE      if object exists, delete  
+#PRESUMPTIONS   node
+def SIP_DeleteFBXExportNode(exportNode):             
+    if cmds.objExists(exportNode):
+        cmds.delete
+        
 
 
 
