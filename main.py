@@ -158,4 +158,24 @@ def SIP_TagForGarbage(node):
         cmds.setAttr(node + ".deleteMe", True)    
 
     
+#PURPOSE          Return the meshes connected to blendshape nodes
+#PROCEDURE        Get a list of blendshape nodes
+#                 Follow those connections to the mesh shape node
+#                 Traverse up the hierarchy to find parent transform node
+#PRESUMPTIONS     character has a valid namespace, namespace does not have colon
+#                 only exporting polygonal meshes
+def SIP_FindMeshesWithBlendshapes(ns):
     
+    returnArray = []
+    
+    blendshapes = cmds.ls((ns + ":*" ), type = "blendShape")
+    
+    for curBlendShape in blendshapes:
+        downstreamNodes = cmds.listHistory(curBlendShape, future = True)
+        for curNode in downstreamNodes:
+            if cmds.objectType(curNode, isType = "mesh"):
+                parents = cmds.listRelatives(curNode, parent = True)
+                returnArray.append(parents[0])
+    
+    return returnArray
+
