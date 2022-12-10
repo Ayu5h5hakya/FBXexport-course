@@ -179,3 +179,23 @@ def SIP_FindMeshesWithBlendshapes(ns):
     
     return returnArray
 
+#PURPOSE        Connect the fbx export node to the origin
+#PROCEDURE      check if attribute exist and nodes are valid
+#               if they are, connect attributes
+#PRESUMPTIONS   none
+def SIP_ConnectFBXExportNodeToOrigin(exportNode, origin):
+
+    if cmds.objExists(origin) and cmds.objExists(exportNode):
+        
+        if not cmds.objExists(origin + ".exportNode"):
+            SIP_TagForExportNode(origin)
+            
+        if not cmds.objExists(exportNode + ".exportNode"):
+            SIP_AddFBXNodeAttrs(fbxExportNode)
+            
+        cmds.connectAttr(origin + ".exportNode", exportNode + ".exportNode")    
+            
+
+
+
+
