@@ -14,7 +14,12 @@ def SIP_TagForOrigin(node):
     if cmds.objExists(node)and not cmds.objExists(node + ".origin"):
         cmds.addAttr(node, shortName = "org", longName = "origin", at = "bool")
         cmds.setAttr(node + ".origin", True)
+        
+        
 
+
+        
+        
 #PURPOSE        add attributes to the mesh so exporter can find them
 #PROCEDURE        if object exists, and the attribute does not, add
 #                exportMeshes message attribute
@@ -36,7 +41,7 @@ def SIP_TagForExportNode(node):
         cmds.addAttr(node, shortName = "xnd", longName = "exportNode", at = "message")
         
 
-        
+
 
 #PURPOSE         Return the origin of the given namespace
 #PROCEDURE       If ns is not empty string, list all joints with
@@ -63,6 +68,11 @@ def SIP_ReturnOrigin(ns):
                 
     return "Error"
 
+
+
+
+
+
 #PRUPOSE        delete given export node
 #PROCEDURE      if object exists, delete  
 #PRESUMPTIONS   node
@@ -70,6 +80,8 @@ def SIP_DeleteFBXExportNode(exportNode):
     if cmds.objExists(exportNode):
         cmds.delete
         
+
+
 
 #PURPOSE        to add the attribute to the export node to store our
 #                export settings
@@ -124,3 +136,26 @@ def SIP_CreateFBXExportNode(characterName):
     return fbxExportNode
 
 
+#PURPOSE      Removes all nodes taged as garbage
+#PROCEDURE    List all transforms in the scene
+#             Itterate through list, anything with "deleteMe" attribute
+#             will be deleted
+#PRESUMPTIONS The deleteMe attribute is name of the attribute signifying garbage
+def SIP_ClearGarbage():
+    list = cmds.ls(tr=True)
+    
+    for cur in list:
+        if cmds.objExists(cur + ".deleteMe"):
+            cmds.delete(cur)
+
+
+#PURPOSE        Tag object for being garbage
+#PROCEDURE      If node is valid object and attribute does not exists, add deleteMe attribute
+#PRESUMPTIONS   None
+def SIP_TagForGarbage(node):    
+    if cmds.objExists(node)and not cmds.objExists(node + ".deleteMe"):
+        cmds.addAttr(node, shortName = "del", longName = "deleteMe", at = "bool")
+        cmds.setAttr(node + ".deleteMe", True)    
+
+    
+    
