@@ -197,5 +197,52 @@ def SIP_ConnectFBXExportNodeToOrigin(exportNode, origin):
             
 
 
+#PURPOSE      To connect meshes to the export node so the exporter can find them          
+#PROCEDURE    check to make sure meshes and exportNode is valid, check for attribute "exportMeshes"
+#             if no attribute, add it. then connect attributes
+#PRESUMPTION  exportNode is a exportNode, and meshes is a list of transform nodes for polygon meshes
+def SIP_ConnectFBXExportNodeToMeshes(exportNode, meshes):
+
+    if cmds.objExists(exportNode):
+        if not cmds.objExists(exportNode + ".exportMeshes"):
+            SIP_AddFBXNodeAttrs(exportNode)
+        for curMesh in meshes:
+			if cmds.objExists(curMesh):
+				if not cmds.objExists(curMesh + ".exportMeshes"):
+					SIP_TagForMeshExport(curMesh)
+				cmds.connectAttr(exportNode + ".exportMeshes", curMesh + ".exportMeshes", force = True)
+            
+
+
+
+
+
+
+#PURPOSE      to disconnect the message attribute between export node and mesh          
+#PROCEDURE    iterate through list of meshes and if mesh exists, disconnect
+#PRESUMPTION  that node and mesh are connected via exportMeshes message attr
+def SIP_DisconnectFBXExportNodeToMeshes(exportNode, meshes):
+    
+    if cmds.objExists(exportNode):
+        for curMesh in meshes:
+            if cmds.objExists(curMesh):
+                cmds.disconnectAttr(exportNode + ".exportMeshes", curMesh + ".exportMeshes")
+                
+
+
+
+                
+                
+
+#PURPOSE        return a list of all meshes connected to the export node
+#PROCEDURE      listConnections to exportMeshes attribute
+#PRESUMPTION    exportMeshes attribute is used to connect to export meshes, exportMeshes is valid
+def SIP_ReturnConnectedMeshes(exportNode):
+    meshes = cmds.listConnections((exportNode + ".exportMeshes"), source = False, destination = True)
+    return meshes        
+
+
+
+
 
 
