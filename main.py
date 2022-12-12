@@ -363,6 +363,82 @@ def SIP_TransformToOrigin(origin, startFrame, endFrame, zeroOrigin):
     
 
 
+#PURPOSE        Record the animLayer settings used in animation and store in 
+#               the exportNode as a string
+#PROCEDURE      List all the animLayers. Query their mute and solo attributes.
+#               List them in one single string
+#               Uses ; as sentinal value to split seperate animLayers
+#               Uses , as sentinal value to split seperate fields for animLayer
+#               Uses = as sentinal value to split seperate attrs from thier values in field
+#PRESUMPTION    None
+def SIP_SetAnimLayerSettings(exportNode):
+ 
+    if not cmds.attributeQuery("animLayers", node=exportNode, exists=True):					   
+        SIP_AddFBXNodeAttrs(exportNode)	
+    
+    animLayers = cmds.ls(type = "animLayer")
+    
+    animLayerCommandStr = ""
+    
+    for curLayer in animLayer:
+        mute = cmds.animLayer(curLayer, query = True, mute = True)
+        solo = cmds.animLayer(curLayer, query = True, solo = True)
+        animLayerCommandStr += (curLayer + ", mute = " + str(mute) + ", solo = " + str(solo) + ";")
+        
+    cmds.setAttr(exportNode + ".animLayers", animLayerCommandStr, type = "string")    
+    
+
+
+
+
+#PURPOSE        Set the animLayers based on the string value in the exportNode
+#PROCEDURE      Use pre-defined sentinal values to split the string for seperate animLayers
+#               And parse out the attributes and their values, then set
+#PRESUMPTION    Uses ; as sentinal value to split seperate animLayers
+#               Uses , as sentinal value to split seperate fields for animLayer
+#               Uses = as sentinal value to split seperate attrs from thier values in field
+#               order is Layer, mute, solo
+def SIP_SetAnimLayersFromSettings(exportNode):
+    
+    if cmds.objExists(exportNode)and cmds.objExists(exportNode + ".animLayers"):
+        animLayersRootString = cmds.getAttr(exportNode + ".animLayers", asString = True)
+        
+        if animLayersRootString:
+            animLayerEntries = animLayersRootString.split(";")
+            
+            for curEntry in animLayerEntries:
+                if curEntry:
+                    fields = curEntry.split(",")
+                    
+                    animLayerField = fields[0]
+                    curMuteField = fields[1]
+                    curSoloField = fields[2]
+                    
+                    muteFieldStr = curMuteField.split(" = ")
+                    soloFieldStr = curMuteField.split(" = ")
+                    
+                    #convert strings to bool values
+                    muteFieldBool = True
+                    soloFieldBool = True
+                    
+                    if muteFieldStr[1] != "True":
+                        muteFieldBool = False                                        
+    
+                    if soloFieldStr[1] != "True":
+                        soloFieldBool = False
+                        
+                    cmds.animLayer(animLayerField, edit = True, mute = muteFieldBool, solo = soloFieldBool)      
+    
+    
+
+
+
+
+    
+def SIP_ClearAnimLayerSettings(exportNode):
+    cmds.setAttr(exportNode + ".animLayers", "", type = "string")
+
+
 
 
 
