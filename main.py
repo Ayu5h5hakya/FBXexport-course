@@ -207,7 +207,7 @@ def SIP_ConnectFBXExportNodeToMeshes(exportNode, meshes):
         if not cmds.objExists(exportNode + ".exportMeshes"):
             SIP_AddFBXNodeAttrs(exportNode)
         for curMesh in meshes:
-			if cmds.objExists(curMesh):
+		    if cmds.objExists(curMesh):
 				if not cmds.objExists(curMesh + ".exportMeshes"):
 					SIP_TagForMeshExport(curMesh)
 				cmds.connectAttr(exportNode + ".exportMeshes", curMesh + ".exportMeshes", force = True)
@@ -240,6 +240,86 @@ def SIP_DisconnectFBXExportNodeToMeshes(exportNode, meshes):
 def SIP_ReturnConnectedMeshes(exportNode):
     meshes = cmds.listConnections((exportNode + ".exportMeshes"), source = False, destination = True)
     return meshes        
+
+
+#PURPOSE        
+#PROCEDURE
+#PRESUMPTIONS
+def SIP_UnlockJointTransforms(root):
+    hierarchy = cmds.listRelatives(root, ad=True, f=True)
+    
+    hierarchy.append(root)
+    
+    for cur in hierarchy:
+		cmds.setAttr( (cur + '.translateX'), lock=False )
+		cmds.setAttr( (cur + '.translateY'), lock=False )
+		cmds.setAttr( (cur + '.translateZ'), lock=False )
+		cmds.setAttr( (cur + '.rotateX'), lock=False )
+		cmds.setAttr( (cur + '.rotateY'), lock=False )
+		cmds.setAttr( (cur + '.rotateZ'), lock=False )
+		cmds.setAttr( (cur + '.scaleX'), lock=False )
+		cmds.setAttr( (cur + '.scaleY'), lock=False )
+		cmds.setAttr( (cur + '.scaleZ'), lock=False )
+
+
+
+
+
+#PURPOSE        to connect given node to other given node via specified transform
+#PROCEDURE      call connectAttr
+#PRESUMPTIONS   assume two nodes exist and transform type is valid
+def SIP_ConnectAttrs(sourceNode, destNode, transform):
+    cmds.connectAttr(sourceNode + "." + transform + "X", destNode + "." + transform + "X")
+    cmds.connectAttr(sourceNode + "." + transform + "Y", destNode + "." + transform + "Y")
+    cmds.connectAttr(sourceNode + "." + transform + "Z", destNode + "." + transform + "Z")
+
+
+
+
+
+
+
+#PURPOSE        To copy the bind skeleton and connect the copy to the original bind
+#PROCEDURE      duplicate hierarchy
+#               delete everything that is not a joint
+#               unlock all the joints
+#               connect the translates, rotates, and scales
+#               parent copy to the world 
+#               add deleteMe attr 
+#PRESUMPTIONS   No joints are children of anything but other joints
+def SIP_CopyAndConnectSkeleton(origin):
+    newHierarchy=[]
+    
+    if origin != "Error" and cmds.objExists(origin):
+        dupHierarchy = cmds.duplicate(origin)
+        tempHierarchy = cmds.listRelatives(dupHierarchy[0], allDescendents=True, f=True)
+
+        for cur in tempHierarchy:
+            if cmds.objExists(cur):
+                if cmds.objectType(cur) != "joint":
+                    cmds.delete(cur)
+
+        SIP_UnlockJointTransforms(dupHierarchy[0])
+  
+       
+        origHierarchy = cmds.listRelatives(origin, ad=True, type = "joint")
+        newHierarchy = cmds.listRelatives(dupHierarchy[0], ad=True, type = "joint")
+
+        
+        origHierarchy.append(origin)
+        newHierarchy.append(dupHierarchy[0])
+        
+
+        
+        for index in range(len(origHierarchy)):
+        	SIP_ConnectAttrs(origHierarchy[index], newHierarchy[index], "translate")
+        	SIP_ConnectAttrs(origHierarchy[index], newHierarchy[index], "rotate")
+        	SIP_ConnectAttrs(origHierarchy[index], newHierarchy[index], "scale")
+        	
+        cmds.parent(dupHierarchy[0], world = True)
+        SIP_TagForGarbage(dupHierarchy[0])
+        
+    return newHierarchy
 
 
 
