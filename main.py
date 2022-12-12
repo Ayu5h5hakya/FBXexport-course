@@ -325,4 +325,45 @@ def SIP_CopyAndConnectSkeleton(origin):
 
 
 
+#PURPOSE        Translate export skeleton to origin. May or may not kill origin animation depending on input
+#PROCEDURE      bake the animation onto our origin
+#               create an animLayer
+#               animLayer will either be additive or overrride depending on parameter we pass
+#               add deleteMe attr to animLayer
+#               move to origin
+#PRESUMPTIONS   origin is valid, end frame is greater than start frame, zeroOrigin is boolean
+def SIP_TransformToOrigin(origin, startFrame, endFrame, zeroOrigin):
+    cmds.bakeResults(origin, t = (startFrame, endFrame), at= ["rx","ry","rz","tx","ty","tz","sx","sy","sz"], hi="none")
+    
+    cmds.select(clear = True)
+    cmds.select(origin)
+    
+    newNaimLayer = ""
+    
+    if zeroOrigin:
+        #kills origin animation 
+        newAnimLayer = cmds.animLayer(aso=True, mute = False, solo = False, override = True, passthrough = True, lock = False)
+        cmds.setAttr (newAnimLayer + ".rotationAccumulationMode", 0)
+        cmds.setAttr (newAnimLayer + ".scaleAccumulationMode", 1)
+    else:
+        #shifts origin animation 
+        newAnimLayer = cmds.animLayer(aso=True, mute = False, solo = False, override = False, passthrough = False, lock = False)
+        
+    SIP_TagForGarbage(newAnimLayer)
+    
+    #turn anim layer on
+    cmds.animLayer(newAnimLayer, edit = True, weight = 1)
+    cmds.setKeyframe(newAnimLayer + ".weight")
+    
+    #move origin animation to world origin
+    cmds.setAttr(origin + ".translate", 0,0,0)
+    cmds.setAttr(origin + ".rotate", 0,0,0)
+    cmds.setKeyframe(origin, al=newAnimLayer, t=startFrame)    
+
+    
+
+
+
+
+
 
