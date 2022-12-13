@@ -440,6 +440,90 @@ def SIP_ClearAnimLayerSettings(exportNode):
 
 
 
+def SIP_ExportFBX(exportNode):
+    curWorkspace = cmds.workspace(q=True, rd=True)
+    fileName = cmds.getAttr(exportNode + ".exportName")
+    
+    if fileName:
+        newFBX = curWorkspace + fileName
+        cmds.file(newFBX, force = True, type = 'FBX export', pr=True, es=True)
+    else:
+        cmds.warning("No Valid Export Filename for Export Node " + exportNode + "\n")
+
+
+
+
+
+
+
+
+
+
+
+def SIP_ExportFBXAnimation(characterName, exportNode):
+
+    SIP_ClearGarbage()
+    characters = []
+    
+    if characterName:
+        characters.append(characterName)
+    else:
+        reference = cmd.file(reference=1, query = True)
+        for curRef in references:
+            characters.append(cmds.file(curRef, namespace = 1, query = True))
+            
+    for curCharacter in characters:
+        
+        #get meshes with blendshapes
+        meshes = SIP_FindMeshesWithBlendshapes(curCharacter)
+        
+        #get origin
+        origin = SIP_ReturnOrigin(curCharacter)
+        
+        exportNodes = []
+        
+        if exportNode:
+            exportNodes.append(exportNode)
+        else:
+            exportNodes = SIP_ReturnFBXExportNodes(origin)
+            
+        
+        for curExportNode in exportNodes:
+            if cmds.getAttr(curExportNode + ".export") and origin != "Error":
+                exportRig = SIP_CopyAndConnectSkeleton(origin)
+                
+                startFrame = cmds.playbackOptions(query=True, minTime=1)
+                endFrame = cmds.playbackOptions(query=True, maxTime=1)
+
+                subAnimCheck = cmds.getAttr(curExportNode + ".useSubRange")
+                
+                if subAnimCheck:
+                    startFrame = cmds.getAttr(curExportNode + ".startFrame")
+                    endFrame = cmds.getAttr(curExportNode + ".endFrame")
+                    
+                if cmds.getAttr(curExportNode + ".moveToOrigin"):
+                    newOrigin = cmds.listConnections(origin + ".translateX", source = False, d = True)
+                    zeroOriginFlag = cmds.getAttr(curExportNode + ".zerOrigin")
+                    SIP_TransformToOrigin(newOrigin[0], startFrame, endFrame, zeroOriginFlag)
+
+                cmds.select(clear = True)
+                cmds.select(exportRig, add=True)
+                cmds.select(meshes, add=True)
+                
+                SIP_SetAnimLayersFromSettings(curExportNode)
+                
+                mel.eval("SIP_SetFBXExportOptions_animation(" + str(startFrame) + "," + str(endFrame) + ")")
+                
+                SIP_ExportFBX(curExportNode)
+                
+            SIP_ClearGarbage()
+
+
+
+
+    
+
+
 
 
 
