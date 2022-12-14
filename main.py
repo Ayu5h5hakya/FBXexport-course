@@ -519,7 +519,35 @@ def SIP_ExportFBXAnimation(characterName, exportNode):
             SIP_ClearGarbage()
 
 
+def SIP_ExportFBXCharacter(exportNode):
+    origin = SIP_ReturnOrigin("")
+    
+    exportNodes = []
 
+    if exportNode:
+        exportNodes.append(exportNode)
+    else:
+        exportNodes = SIP_ReturnFBXExportNodes(origin)
+        
+    parentNode = cmds.listRelatives(origin, parent=True, fullPath = True)
+    
+    if parentNode:
+        cmds.parent(origin, world = True)
+        
+    for curExportNode in exportNodes:
+        if cmds.getAttr(curExportNode + ".export"):
+            mel.eval("SIP_SetFBXExportOptions_model()")
+            
+            cmds.select(clear = True)
+            
+            meshes = SIP_ReturnConnectedMeshes(exportNode)
+            cmds.select(origin, add = True)
+            cmds.select(meshes, add = True)
+            
+            SIP_ExportFbx(curExportNode)
+            
+        if parentNode:
+            cmds.parent(origin, parentNode[0])
 
     
 
