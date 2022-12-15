@@ -589,6 +589,30 @@ def SIP_FBXExporterUI_PopulateAniamtionActorPanel():
                 cmds.textScrollList("sip_FBXExporter_window_animationActorsTextScrollList", edit = True, append = ns)              
 
 
+def SIP_FBXExporter_AnimationHelpWindow():
+    if cmds.window("sip_FBXExporter_animationHelpWindow", exists = True):
+        cmds.deleteUI("sip_FBXExporter_animationHelpWindow")
+        
+    cmds.window("sip_FBXExporter_animationHelpWindow", s = True, width = 500, height = 500, menuBar = True, title = "Help on Animation Export")
+    cmds.paneLayout(configuration = 'horizontal4')
+    cmds.scrollField(editable = False, wordWrap = True, text = "Animation Export: \nAnimation export assumes single-level referencing with proper namesapce.\n\nActors: \nAll referenced characters with a origin joint tagged with the origin attribute will be listed in the Actor's field by their namespace. Please see the modeling help window for how to tage a character's origin with the origin attribute.\n\nExport Nodes:\nThe Export Nodes panel will fill in with export nodes connected to the origin of the selected actor from the Actor's field. Clicking on the New Export Node will create a new node. Each export node represents a seperate animation.\n\nExport:\nThe Export flag means the current export ndoe will be available for export. All nodes wihtout this checked will not be exported.\n\nMove to origin:\nNot yet supported\n\nSub Range:\nTurn this on to enable the sub-range option for the selected node. This will enable the Start Frame and End Frame fields where you can set the range for the specified animation. Otherwise, the animation will use the frame range of the file.\n\nExport File Name:\nClick on the Browse button to browse to where you want the file to go. The path will be project relative.\n\nExport Selected Animation:\nClick this button to export the animation selected in Export Nodes\n\nExport All Animations For Selected Character:\nClick this button to export all animations for the selected actor in the Actors filed. This flag will ignore what is selected in Export Nodes and export from all found nodes for the character\n\nExport All Animations:\nClick this button to export all animations for all characters. All selections will be ignored" )		
+    
+    cmds.showWindow("sip_FBXExporter_animationHelpWindow")
+
+
+
+
+
+def SIP_FBXExporter_ModelHelpWindow():
+    if cmds.window("sip_FBXExporter_modelHelpWindow", exists = True):
+        cmds.deleteUI("sip_FBXExporter_modelHelpWindow")
+        
+    cmds.window("sip_FBXExporter_modelHelpWindow", s = True, width = 500, height = 500, menuBar = True, title = "Help on Model Export")
+    cmds.paneLayout(configuration = 'horizontal4')
+    cmds.scrollField(editable = False, wordWrap = True, text = "Model Export: \nModel exporter assumes one skeleton for export. Referencing for model export is not supported\n\nRoot Joints: \nPanel will list all the joints tagged with the \"origin\" attribute. If no joint is tagged with the attribute, it will list all joints in the scene and turn red. Select the root joint and click the Tag as Origin button.\n\nExport Nodes:\nThe Export Nodes panel will fill in with export nodes connected to the origin of the selected actor from the Actor's field. Clicking on the New Export Node will create a new node. Each export node represents a seperate character export (for example, seperate LOD's).\n\nMeshes:\nThe Meshes panel shows all the geometry associated with the selected export node. This can be used if you have mesh variations skinned to the same rig or LOD's.\n\nExport File Name:\nClick on the Browse button to browse to where you want the file to go. The path will be project relative.\n\nExport Selected Character:\nClick this button to export the character selected in Export Nodes\n\nExport All Characters:\nClick this button to export all character definitions for the skeleton. All selections will be ignored" )
+	
+    cmds.showWindow("sip_FBXExporter_modelHelpWindow")
+
 
 
 
