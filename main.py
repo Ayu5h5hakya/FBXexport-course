@@ -2,7 +2,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 import string
 
-
+mel.eval("source SIP_FBXAnimationExporter_FBXOptions.mel")
 
 #PURPOSE     Tag the given node with the
 #            origin attribute and set to true
@@ -550,6 +550,43 @@ def SIP_ExportFBXCharacter(exportNode):
             cmds.parent(origin, parentNode[0])
 
     
+#PURPOSE        Populate the root joints panel in the model tab
+#PROCEDURE      it will search for the origin. if none found, list all joints in the scene
+#PRESUMPTION    origin is going to be a joint, rigs are not referenced in
+def SIP_FBXExporterUI_PopulateModelRootJointsPanel():
+    
+    cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", edit = True, removeAll = True)
+    
+    origin = SIP_ReturnOrigin("")
+    
+    if origin != "Error":
+        cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", edit = True, ebg = False, append = origin)
+    else:
+        joints = cmds.ls(type = "joint")
+        for curJoint in joints:
+            cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", edit = True, bgc = [1, 0.1, 0.1], append = curJoint)
+
+
+
+#PURPOSE        To populate the actor panel in the UI
+#PROCEDURE      get list of all references in the scene
+#               for each reference, get the namespace
+#               call SIP_ReturnOrigin for each namespace.
+#               if not "Error", add namespace to textScrollList
+#PRESUMPTION    single-layered referencing, references have namespace
+def SIP_FBXExporterUI_PopulateAniamtionActorPanel():
+    
+    cmds.textScrollList("sip_FBXExporter_window_animationActorsTextScrollList", edit = True, removeAll = True)
+    
+    references = cmds.file(query = True, reference = True)
+    
+    for curRef in references:
+        if not cmds.file(curRef, query = True, deferReference = True):
+            ns = cmds.file(curRef, query = True, namespace = True)
+            origin = SIP_ReturnOrigin(ns)
+            
+            if origin != "Error":
+                cmds.textScrollList("sip_FBXExporter_window_animationActorsTextScrollList", edit = True, append = ns)              
 
 
 
