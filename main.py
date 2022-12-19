@@ -728,4 +728,38 @@ def SIP_FBXExporter_UI():
 
     cmds.showWindow("sip_FBXExporter_window")
 
+#PURPOSE        Populate the root joints panel in the model tab
+#PROCEDURE      it will search for the origin. if none found, list all joints in the scene
+#PRESUMPTION    origin is going to be a joint, rigs are not referenced in
+def SIP_FBXExporterUI_PopulateModelRootJointsPanel():
+    
+    cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", edit = True, removeAll = True)
+    
+    origin = SIP_ReturnOrigin("")
+    
+    if origin != "Error":
+        cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", edit = True, ebg = False, append = origin)
+    else:
+        joints = cmds.ls(type = "joint")
+        for curJoint in joints:
+            cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", edit = True, bgc = [1, 0.1, 0.1], append = curJoint)
+
+
+
+
+
+
+#PURPOSE        Populate the export nodes panel with fbx export nodes connected to the origin
+#PROCEDURE      get origin form OriginTextScrollList, call SIP_ReturnFBXExportNodes, populate ModelExportNodesTextScrollList with list from that proc
+#PRESUMPTION    none
+def SIP_FBXExporterUI_PopulateModelsExportNodesPanel():
+    origin = cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", query = True, selectedItem = True)
+    cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", edit = True, removeAll = True)
+    
+    if origin:
+        exportNodes = SIP_ReturnFBXExportNodes(origin[0]) 
+        
+    if exportNodes:
+        for cur in exportNodes:
+            cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", edit = True, append = cur) 
 
