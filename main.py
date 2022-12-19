@@ -763,3 +763,45 @@ def SIP_FBXExporterUI_PopulateModelsExportNodesPanel():
         for cur in exportNodes:
             cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", edit = True, append = cur) 
 
+#PURPOSE        populate our geometry panel
+#PROCEDURE      clear out the geom textScrollList. Get selected export node. Get meshes with SIP_ReturnConnectedMeshes. Iterate through list, add each item to geom textScrollList
+#PRESUMPTION    selected export node is a valid object
+def SIP_FBXExporterUI_PopulateGeomPanel():
+    cmds.textScrollList("sip_FBXExporter_window_modelsGeomTextScrollList", edit = True, removeAll = True)
+    exportNode = cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", query = True, selectItem = True)
+    meshes = SIP_ReturnConnectedMeshes(exportNode[0])
+    
+    if meshes:
+        for curMesh in meshes:
+            cmds.textScrollList("sip_FBXExporter_window_modelsGeomTextScrollList", edit = True, append = curMesh)
+
+
+
+
+
+
+#PURPOSE        Tag a joint to be an origin
+#PROCEDURE      get joint from the textScrollList of origins, call SIP_TagForOrigin, repopulate model root joint panel
+#PRESUMPTION    item in the textScrollList is valid
+def SIP_FBXExporterUI_ModelTagForOrigin():
+    joints = cmds.textScrollList("sip_FBXEporter_window_modelsOriginTextScrollList", query = True, selectedItem = True)
+    SIP_TagForOrigin(joints[0])
+    SIP_FBXExporterUI_PopulateModelRootJointPanel()
+
+
+
+
+
+
+#PURPOSE        to create noew export node and add to Model export node panel
+#PROCEDURE      get origin from modelsOriginTextScrollList, call SIP_CreateFBXExportNode, connect to origin, repopulate ModelsExportNodesPanel
+#PRESUMPTION    none
+def SIP_FBXExporterUI_ModelCreateNewExportNode():
+    origin = cmds.textScrollList("sip_FBXExporter_window_modelsOriginTextScrollList", query = True, selectedItem = True)
+    
+    if origin[0] != "Error":
+        exportNode = SIP_CreateFBXExportNode(origin[0])
+        
+        if exportNdoe:
+            SIP_ConnectFBXExportNodeToOrigin(exportNode, origin[0])
+            SIP_FBXExporterUI_PopulateModelsExportNodesPanel()
