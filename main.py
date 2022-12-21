@@ -861,3 +861,25 @@ def SIP_FBXExporterUI_UpdateExportNodeFromModelSettings():
     if exportNodes:
         cmds.setAttr(exportNodes[0] + ".exportName", cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", query = True, text = True), type = "string")
         cmds.setAttr(exportNodes[0] + ".export", cmds.checkBoxGrp("sip_FBXExporter_window_modelExportCheckBoxGrp", query = True, value1 = True))
+
+#PURPOSE        Export all characters from the scene
+#PROCEDURE      
+#PRESUMPTION    Every scene for character export has only one origin
+def SIP_FBXExporterUI_ModelExportAllCharacters():
+    origin = SIP_ReturnOrigin("")
+    
+    exportNodes = SIP_ReturnFBXExportNodes(origin)
+    
+    for cur in exportNodes:
+        if cmds.objExists(cur):
+            SIP_ExportFBXCharacter(cur)
+    
+    
+#PURPOSE        Export the selected exportNode
+#PROCEDURE      
+#PRESUMPTION      
+def SIP_FBXExporterUI_ModelExportSelectedCharacter():
+    exportNodes = cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", query = True, selectedItem = True)
+    SIP_ExportFBXCharacter(exportNodes[0])
+
+
