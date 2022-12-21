@@ -805,3 +805,59 @@ def SIP_FBXExporterUI_ModelCreateNewExportNode():
         if exportNdoe:
             SIP_ConnectFBXExportNodeToOrigin(exportNode, origin[0])
             SIP_FBXExporterUI_PopulateModelsExportNodesPanel()
+
+#PURPOSE        connect and disconnect meshes from the export node and update geom panel
+#PROCEDURE      get export node from textScrollList
+#               get selected meshes from textScrollList
+#               if list of select meshes is not empty, call SIP_DisconnectFBXExportNodeToMeshes with list
+#               if list is empty, call SIP_ConnectFBXExportNodeToMeshes
+#               repopulate Geom panel
+#PRESUMPTION    none
+def SIP_FBXExporterUI_ModelAddRemoveMeshes():
+    exportNode = cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", query = True, selectItem = True)	
+    meshes = cmds.textScrollList("sip_FBXExporter_window_modelsGeomTextScrollList", query = True, selectItem = True)
+ 
+    if exportNode:
+        if meshes:
+            SIP_DisconnectFBXExportNodeToMeshes(exportNode[0], meshes)
+        else:
+            sel = cmds.ls(selection = True)
+            if sel:
+                SIP_ConnectFBXExportNodeToMeshes(exportNode[0], sel)
+                
+        SIP_FBXExporterUI_PopulateGeomPanel()
+
+
+
+
+
+
+#PURPOSE        Populate the UI with the export settings stored in the selected export node
+#PROCEDURE      Get the selected export node from the exportNodeTextScrollList
+#               Unlock UI settings and set them according to the values in the selected export node
+#PRESUMPTION    selected export node is a valid object
+def SIP_FBXExporterUI_UpdateModelExportSettings():
+    exportNodes = cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", query = True, selectedItem = True)
+    
+    cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", edit = True, enable = True, text = "")
+    
+    SIP_AddFBXNodeAttrs(exportNode[0])
+    
+    if exportNodes:
+        cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", edit = True, text = cmds.getAttr(exportNode[0] + ".exportName"))
+        cmds.checkBoxGrp("sip_FBXExporter_window_modelExportCheckBoxGrp", edit = True, enable =  True, value1 = cmds.getAttr(exportNode[0] + ".export"))
+        
+
+
+
+
+
+#PURPOSE        Update the selected export node with the options set in the UI
+#PROCEDURE      Read in the values of the UI and call setAttr on the selected export node
+#PRESUMPTION    selected export node is valid and has the needed attributes
+def SIP_FBXExporterUI_UpdateExportNodeFromModelSettings():
+    exportNodes = cmds.textScrollList("sip_FBXExporter_window_modelsExportNodesTextScrollList", query = True, selectedItem = True)
+
+    if exportNodes:
+        cmds.setAttr(exportNodes[0] + ".exportName", cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", query = True, text = True), type = "string")
+        cmds.setAttr(exportNodes[0] + ".export", cmds.checkBoxGrp("sip_FBXExporter_window_modelExportCheckBoxGrp", query = True, value1 = True))
