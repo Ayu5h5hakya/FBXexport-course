@@ -883,3 +883,40 @@ def SIP_FBXExporterUI_ModelExportSelectedCharacter():
     SIP_ExportFBXCharacter(exportNodes[0])
 
 
+#PURPOSE         browse for and set the export filename
+#PROCEDURE       pass in a flag to determine if it's model or animation tab
+#                get the project path
+#                filename from fileDialog2
+#                prune off the project path
+#                set the UI
+#                update the export node
+#PRESUMPTION     flag of 1 = animation tab, flag of 2 will equal model tab. Project is set 
+def SIP_FBXExporterUI_BrowseExportFilename(flag):
+    temp = ""
+    
+    if flag == 1:
+        temp = cmds.textFieldButtonGrp("sip_FBXExporter_window_animationExportFileNameTextFieldButtonGrp", query = True, text = True)
+    elif flag == 2:
+        temp = cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", query = True, text = True)
+
+
+    project = cmds.workspace(q=True, rd=True)
+    dirmask = project + "/" + temp
+    newFileList = cmds.fileDialog2(fm=0, startingDirectory = dirmask, fileFilter = "FBX export (*.fbx)")
+    
+    newfile = ""
+    
+    if newFileList:
+        newFile = newFileList[0]
+        newFile = string.replace(newFile, project, '')
+    else:
+        newFile = temp
+        
+        
+    if flag == 1:
+        cmds.textFieldButtonGrp("sip_FBXExporter_window_animationExportFileNameTextFieldButtonGrp", edit = True, text = newFile)
+        #add proc call to update export node form animation settings
+    elif flag == 2:
+        cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", edit = True, text = newFile)
+        SIP_FBXExporterUI_UpdateExportNodeFromModelSettings()
+
