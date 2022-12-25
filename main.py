@@ -920,3 +920,67 @@ def SIP_FBXExporterUI_BrowseExportFilename(flag):
         cmds.textFieldButtonGrp("sip_FBXExporter_window_modelExportFileNameTextFieldButtonGrp", edit = True, text = newFile)
         SIP_FBXExporterUI_UpdateExportNodeFromModelSettings()
 
+#PURPOSE        select the export node in the scene that is selected in the UI
+#PROCEDURE      get export node name from selected element in uiElement. clear selection, then select exportNode
+#PRESUMPTION    uiElement is a textScrollList, multiselection is off
+def SIP_FBXExporterUI_SelectExportNode(uiElement):
+    exportNodes = cmds.textScrollList(uiElement, query = True, selectItem = True)
+    
+    if cmds.objExists(exportNodes[0]):
+        cmds.select(clear = True)
+        cmds.select(exportNodes)
+
+
+
+
+
+#PURPOSE        delete the export node selected in the UI
+#PROCEDURE      get export node name form ui. Call SIP_DeleteFBXExportNode, update ui
+#PRESUMPTION    uiElement is a textScrollList, multiselection is off
+def SIP_FBXExporterUI_DeleteExportNode(uiElement):
+    exportNodes = cmds.textScrollList(uiElement, query = True, selectItem = True)
+    SIP_DeleteFBXExportNode(exportNodes[0])
+    #update animation export nodes panel proc goes here
+    SIP_FBXExporterUI_PopulateModelsExportNodesPanel()
+
+
+
+
+
+
+#PURPOSE        generate window where we can enter text to rename selected export node
+#PROCEDURE      create a new window
+#               get export node name from textScrollList
+#PRESUMPTION    uiElement is a textScrollList, multiselection is off
+def SIP_FBXExporterUI_RenameExportNode_UI(uiElement):
+    exportNodes = cmds.textScrollList(uiElement, query = True, selectItem = True)
+    
+    if cmds.window("sip_FBXExporter_renameExportNode_window", exists = True):
+        cmds.deleteUI("sip_FBXExporter_renameExportNode_window")
+        
+    cmds.window("sip_FBXExporter_renameExportNode_window", s = False, width = 225, height = 100, menuBar = True, title = "Rename Export Node")
+    
+    
+    cmds.frameLayout("sip_FBXExporter_rename_frameLayout", collapsable = False, label = "", borderVisibile = False)
+    cmds.formLayout("sip_FBXExporter_rename_formLayout", numberOfDivisions = 100, parent = "sip_FBXExporter_rename_frameLayout")
+    
+    cmds.textFieldGrp("sip_FBXExporter_rename_textFieldGrp", label = "New Name", columnWidth2 = [75, 175], parent = "sip_FBXExporter_rename_formLayout")
+    cmds.button("sip_FBXExporter_rename_renameButton", width = 75, label = "Rename", parent = "sip_FBXExporter_rename_formLayout", command = "import SIP_FBXAnimationExporter as FBX\nFBX.SIP_FBXExporterUI_RenameExportNode(\"" + exportNodes[0] + "\")")
+    cmds.button("sip_FBXExporter_rename_cancelButton", width = 75, label = "Cancel", parent = "sip_FBXExporter_rename_formLayout", command = "cmds.deleteUI(\"sip_FBXExporter_renameExportNode_window\")")
+    
+    
+    cmds.showWindow("sip_FBXExporter_renameExportNode_window")    
+    
+    
+
+
+
+def SIP_FBXExporterUI_RenameExportNode(exportNode):
+    newName = cmds.textFieldGrp("sip_FBXExporter_rename_textFieldGrp", query = True, text = True)
+    cmds.rename(exportNode, newName)
+
+    #add call to animation update proc here
+    SIP_FBXExporterUI_PopulateModelsExportNodesPanel()
+
+    cmds.deleteUI("sip_FBXExporter_renameExportNode_window")
+    
